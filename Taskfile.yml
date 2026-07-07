@@ -1,0 +1,6 @@
+version: '3'
+
+tasks:
+  proto:
+    cmds:
+      - protoc -I=./proto --go_out=./proto/coffeeshop_proto --go_opt=paths=source_relative --go-grpc_out=./proto/coffeeshop_proto --go-grpc_opt=paths=source_relative coffee_shop.proto
