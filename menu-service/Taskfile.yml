@@ -1,0 +1,40 @@
+version: '3'
+
+vars:
+  PROTO_DIR: proto/v1
+  PROTO_FILE: menu.proto
+
+tasks:
+  proto:
+    desc: Generate Go code from proto files
+    sources:
+      - "{{.PROTO_DIR}}/{{.PROTO_FILE}}"
+    generates:
+      - "{{.PROTO_DIR}}/*.pb.go"
+      - "{{.PROTO_DIR}}/*_grpc.pb.go"
+    cmds:
+      - echo "Generating Go code from {{.PROTO_FILE}}..."
+      - >-
+        protoc -I.
+        --go_out=. --go_opt=paths=source_relative
+        --go-grpc_out=. --go-grpc_opt=paths=source_relative
+        {{.PROTO_DIR}}/{{.PROTO_FILE}}
+      - echo "Generation complete!"
+
+  run:
+    desc: Run the menu service
+    cmds:
+      - go run cmd/main.go
+
+  build:
+    desc: Build the menu service binary
+    cmds:
+      - go build -o bin/menu-service cmd/api/main.go
+
+  clean:
+    desc: Remove generated proto files
+    cmds:
+      - cmd: powershell -Command "Remove-Item -Path '{{.PROTO_DIR}}/*.pb.go' -Force -ErrorAction SilentlyContinue"
+        platforms: [windows]
+      - cmd: rm -f {{.PROTO_DIR}}/*.pb.go
+        platforms: [linux, darwin]

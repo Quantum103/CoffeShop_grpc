@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package menu.v1;
+
+option go_package = "github.com/Quantum103/menu-service/proto/v1;menuv1";
+
+service MenuService{
+    rpc GetActiveMenu(GetMenuRequest) returns (stream GetMenuResponse) {};
+    rpc GetItem(GetItemRequest) returns (Item);
+}
+
+message GetMenuRequest{
+    string category = 1;
+}
+
+message GetMenuResponse{
+    repeated Item items = 1;
+}
+
+message GetItemRequest{
+    string item_id = 1;
+}
+
+message Item {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  bool is_available = 5;
+}
