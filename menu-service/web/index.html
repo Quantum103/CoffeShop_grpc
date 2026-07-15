@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Меню Кофейни</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #f9f9f9; }
+        h1 { text-align: center; color: #333; }
+        .menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; color: #4CAF50; }
+        .price { font-size: 1.2em; font-weight: bold; color: #333; }
+        .status { display: inline-block; padding: 5px 10px; border-radius: 5px; font-size: 0.9em; margin-top: 10px;}
+        .available { background: #e8f5e9; color: #2e7d32; }
+        .unavailable { background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+    <h1 Меню нашей кофейни</h1>
+    <div id="menu" class="menu">Загрузка...</div>
+
+    <script>
+        async function loadMenu() {
+            try {
+                const response = await fetch('/api/menu');
+                const items = await response.json();
+                
+                const menuDiv = document.getElementById('menu');
+                menuDiv.innerHTML = ''; 
+
+                items.forEach(item => {
+                    const statusClass = item.is_available ? 'available' : 'unavailable';
+                    const statusText = item.is_available ? 'В наличии' : 'Нет в наличии';
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <p>${item.description || 'Нет описания'}</p>
+                        <div class="price">${item.price} ₽</div>
+                        <div class="status ${statusClass}">${statusText}</div>
+                    `;
+                    menuDiv.appendChild(card);
+                });
+            } catch (error) {
+                document.getElementById('menu').innerText = 'Ошибка загрузки меню: ' + error;
+            }
+        }
+
+        // Загружаем меню при открытии страницы
+        loadMenu();
+    </script>
+</body>
+</html>

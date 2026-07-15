@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 
 	"github.com/Quantum103/menu-service/internal/database"
 	"github.com/Quantum103/menu-service/internal/handler"
@@ -44,6 +46,27 @@ func main() {
 	pb.RegisterMenuServiceServer(grpcServer, h)
 
 	fmt.Println("Menu Service запущен")
+	// HTTP сервер
+	httpMux := http.NewServeMux()
+	// статические файлы
+	httpMux.Handle("/", http.FileServer(http.Dir("web")))
+
+	// API для получения меню
+	httpMux.HandleFunc("/api/menu", func(w http.ResponseWriter, r *http.Request) {
+		items, err := svc.GetActiveMenu(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(items)
+	})
+	go func() {
+		fmt.Println("HTTP сервер запущен")
+		if err := http.ListenAndServe(":8080", httpMux); err != nil {
+			log.Fatalf("Ошибка HTTP сервера: %v", err)
+		}
+	}()
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Ошибка запуска сервера: %v", err)
