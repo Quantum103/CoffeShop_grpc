@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	models "github.com/Quantum103/menu-service/internal/model"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,9 +14,14 @@ type MenuRepository interface {
 	GetItemByID(ctx context.Context, id string) (*models.Item, error)
 }
 
+type Querier interface {
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
 // РЕАЛИЗАЦИЯ интерфейса для PostgreSQL
 type pgxMenuRepository struct {
-	db *pgxpool.Pool
+	db Querier
 }
 
 // Создаёт новый репозиторий с подключением к БД
